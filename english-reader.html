@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LinguaRead</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f8f7f4; --paper:#fff; --ink:#1a1917; --ink2:#6b6760; --ink3:#b0aca5;
+  --border:#e5e1da; --accent:#2952a3; --accent-bg:#eef2fb;
+  --gold:#a07020; --gold-bg:#fdf8ee; --ru-bg:#f0f5ff; --ru:#1e3f8a;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--ink);font-family:'Lora',Georgia,serif;line-height:1.8;}
+header{background:var(--paper);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:50;}
+.logo{font-size:19px;font-weight:600;} .logo em{color:var(--accent);font-style:normal;}
+.sub{font-family:'Inter',sans-serif;font-size:11px;color:var(--ink3);letter-spacing:1.5px;text-transform:uppercase;}
+.wrap{max-width:760px;margin:0 auto;padding:36px 20px 80px;}
+.card{background:var(--paper);border:1px solid var(--border);border-radius:4px;padding:26px;margin-bottom:24px;}
+.card-title{font-family:'Inter',sans-serif;font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3);margin-bottom:18px;}
+
+.drop-zone{border:1.5px dashed var(--border);border-radius:4px;padding:24px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:14px;position:relative;background:#fdfdfb;}
+.drop-zone:hover,.drop-zone.drag{border-color:var(--accent);background:var(--accent-bg);}
+.drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.drop-icon{font-size:26px;margin-bottom:6px;}
+.drop-main{font-family:'Inter',sans-serif;font-size:13px;color:var(--ink2);}
+.drop-main strong{color:var(--accent);}
+.drop-formats{font-family:'Inter',sans-serif;font-size:11px;color:var(--ink3);margin-top:3px;}
+
+.file-badge{display:none;align-items:center;gap:8px;padding:9px 13px;background:var(--accent-bg);border:1px solid #c5d3ef;border-radius:4px;font-family:'Inter',sans-serif;font-size:13px;color:var(--accent);margin-bottom:12px;}
+.file-badge.show{display:flex;}
+.file-badge .x{margin-left:auto;cursor:pointer;color:var(--ink3);font-size:17px;line-height:1;}
+
+.divider{text-align:center;font-family:'Inter',sans-serif;font-size:11px;color:var(--ink3);letter-spacing:1px;margin:14px 0;position:relative;}
+.divider::before,.divider::after{content:'';position:absolute;top:50%;width:43%;height:1px;background:var(--border);}
+.divider::before{left:0;}.divider::after{right:0;}
+
+textarea{width:100%;min-height:120px;border:1px solid var(--border);border-radius:4px;padding:13px;font-family:'Lora',Georgia,serif;font-size:15px;line-height:1.75;color:var(--ink);background:#fdfdfb;resize:vertical;outline:none;transition:border-color .2s;}
+textarea:focus{border-color:var(--accent);}
+textarea::placeholder{color:var(--ink3);font-style:italic;}
+
+.lang-row{display:flex;gap:8px;align-items:center;margin:13px 0;}
+.lang-label{font-family:'Inter',sans-serif;font-size:12px;color:var(--ink2);}
+.lang-btn{padding:5px 15px;border:1px solid var(--border);background:transparent;border-radius:20px;cursor:pointer;font-family:'Inter',sans-serif;font-size:12px;color:var(--ink2);transition:all .18s;}
+.lang-btn.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+.go-btn{width:100%;padding:13px;background:var(--ink);color:#fff;border:none;border-radius:4px;font-family:'Lora',Georgia,serif;font-size:15px;cursor:pointer;transition:background .2s;margin-top:4px;}
+.go-btn:hover{background:#2d2c2a;}
+.go-btn:disabled{background:var(--ink3);cursor:not-allowed;}
+
+.loader{display:none;text-align:center;padding:44px 0;}
+.loader.show{display:block;}
+.dots{display:inline-flex;gap:5px;margin-bottom:14px;}
+.dots span{width:7px;height:7px;background:var(--accent);border-radius:50%;animation:bop 1.1s infinite;}
+.dots span:nth-child(2){animation-delay:.18s;}
+.dots span:nth-child(3){animation-delay:.36s;}
+@keyframes bop{0%,80%,100%{transform:scale(.55);opacity:.35}40%{transform:scale(1);opacity:1}}
+.loader-msg{font-family:'Inter',sans-serif;font-size:13px;color:var(--ink3);font-style:italic;}
+
+.prog{height:2px;background:var(--border);border-radius:2px;margin-bottom:22px;display:none;}
+.prog.show{display:block;}
+.prog-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s ease;width:0;}
+
+.err-box{display:none;padding:11px 15px;background:#fff5f5;border:1px solid #fcc;border-radius:4px;color:#b00;font-family:'Inter',sans-serif;font-size:13px;margin-bottom:18px;}
+.err-box.show{display:block;}
+
+.results{display:none;}
+.results.show{display:block;}
+.results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.results-label{font-family:'Inter',sans-serif;font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3);}
+.reset-btn{font-family:'Inter',sans-serif;font-size:11px;color:var(--ink3);background:none;border:1px solid var(--border);padding:4px 12px;border-radius:20px;cursor:pointer;}
+.reset-btn:hover{color:var(--ink);border-color:var(--ink2);}
+
+.results-box{background:var(--paper);border:1px solid var(--border);border-radius:4px;overflow:hidden;}
+
+.para{border-bottom:1px solid var(--border);animation:fadeUp .35s ease both;}
+.para:last-child{border-bottom:none;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.tag{font-family:'Inter',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);margin-bottom:5px;}
+.p-en{padding:18px 22px 16px;background:#fafaf8;font-size:16px;line-height:1.85;}
+.p-ru{padding:14px 22px 16px;background:var(--ru-bg);border-left:3px solid var(--accent);font-size:15px;line-height:1.8;color:var(--ru);font-style:italic;}
+.p-ru .tag{color:#7a9fcc;}
+.vocab{background:var(--gold-bg);border-left:3px solid var(--gold);padding:12px 22px 14px;}
+.vocab .tag{color:var(--gold);}
+.v-item{margin-bottom:7px;padding-left:10px;border-left:1.5px solid #d4a840;margin-left:2px;}
+.v-item:last-child{margin-bottom:0;}
+.v-phrase{font-style:italic;color:#7a5010;font-size:14px;}
+.v-exp{font-family:'Inter',sans-serif;font-size:12px;color:var(--ink2);margin-top:1px;line-height:1.5;}
+
+@media(max-width:580px){.p-en,.p-ru,.vocab{padding-left:14px;padding-right:14px;}header{padding:12px 16px;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Lingua<em>Read</em></div>
+  <div class="sub">AI · Параллельный перевод</div>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <div class="card-title">Загрузи текст</div>
+
+    <div class="drop-zone" id="dropZone">
+      <input type="file" id="fileInput" accept=".txt,.docx,.rtf">
+      <div class="drop-icon">📄</div>
+      <div class="drop-main"><strong>Нажми или перетащи файл</strong></div>
+      <div class="drop-formats">TXT · DOCX · RTF</div>
+    </div>
+
+    <div class="file-badge" id="fileBadge">
+      <span>📎</span><span id="fileName"></span>
+      <span class="x" onclick="clearFile()">×</span>
+    </div>
+
+    <div class="divider">или вставь текст вручную</div>
+    <textarea id="textInput" placeholder="Вставь любой текст на английском или русском..."></textarea>
+
+    <div class="lang-row">
+      <span class="lang-label">Язык оригинала:</span>
+      <button class="lang-btn on" id="btnEn" onclick="setLang('en')">🇬🇧 Английский</button>
+      <button class="lang-btn" id="btnRu" onclick="setLang('ru')">🇷🇺 Русский</button>
+    </div>
+
+    <button class="go-btn" id="goBtn" onclick="run()">Перевести построчно →</button>
+  </div>
+
+  <div class="err-box" id="errBox"></div>
+
+  <div class="loader" id="loader">
+    <div class="dots"><span></span><span></span><span></span></div>
+    <div class="loader-msg" id="loaderMsg">Claude AI переводит...</div>
+  </div>
+
+  <div class="prog" id="prog"><div class="prog-fill" id="progFill"></div></div>
+
+  <div class="results" id="results">
+    <div class="results-header">
+      <div class="results-label">Параллельный перевод · Claude AI</div>
+      <button class="reset-btn" onclick="resetAll()">← Новый текст</button>
+    </div>
+    <div class="results-box" id="resultsBox"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script>
+let lang = 'en';
+let fileText = '';
+
+function setLang(l) {
+  lang = l;
+  document.getElementById('btnEn').classList.toggle('on', l === 'en');
+  document.getElementById('btnRu').classList.toggle('on', l === 'ru');
+}
+
+// FILE
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag'); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+
+async function handleFile(file) {
+  showErr('');
+  const name = file.name.toLowerCase();
+  try {
+    if (name.endsWith('.txt') || name.endsWith('.rtf')) {
+      fileText = await file.text();
+    } else if (name.endsWith('.docx') || name.endsWith('.doc')) {
+      const ab = await file.arrayBuffer();
+      const res = await mammoth.extractRawText({ arrayBuffer: ab });
+      fileText = res.value;
+    } else {
+      showErr('Поддерживаются: TXT, DOCX, RTF. Для PDF скопируй текст вручную.'); return;
+    }
+    fileText = fileText.trim();
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileBadge').classList.add('show');
+    document.getElementById('textInput').value = '';
+  } catch (e) {
+    showErr('Ошибка чтения файла: ' + e.message);
+  }
+}
+
+function clearFile() {
+  fileText = '';
+  fileInput.value = '';
+  document.getElementById('fileBadge').classList.remove('show');
+}
+
+// SPLIT
+function splitText(text) {
+  const sentences = text.match(/[^.!?]+[.!?]+['")\]]*\s*/g) || [text];
+  const chunks = [];
+  let cur = '';
+  for (const s of sentences) {
+    if ((cur + s).length > 600 && cur.length > 80) { chunks.push(cur.trim()); cur = s; }
+    else cur += s;
+  }
+  if (cur.trim()) chunks.push(cur.trim());
+  return chunks.length ? chunks : [text.trim()];
+}
+
+// MAIN
+async function run() {
+  const manual = document.getElementById('textInput').value.trim();
+  const text = fileText || manual;
+  if (!text || text.length < 20) { showErr('Добавь текст — загрузи файл или вставь вручную.'); return; }
+
+  const chunks = splitText(text);
+  document.getElementById('goBtn').disabled = true;
+  document.getElementById('loader').classList.add('show');
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('resultsBox').innerHTML = '';
+  document.getElementById('prog').classList.add('show');
+  setProgress(0);
+  showErr('');
+
+  const isEn = lang === 'en';
+  const srcLang = isEn ? 'English' : 'Russian';
+  const tgtLang = isEn ? 'Russian' : 'English';
+
+  try {
+    for (let i = 0; i < chunks.length; i++) {
+      setProgress(Math.round((i / chunks.length) * 92));
+      document.getElementById('loaderMsg').textContent = `Claude переводит... (${i + 1}/${chunks.length})`;
+      const blocks = await translateChunk(chunks[i], srcLang, tgtLang);
+      if (!blocks || !blocks.length) continue;
+      if (i === 0) document.getElementById('results').classList.add('show');
+      renderBlocks(blocks, isEn);
+    }
+    setProgress(100);
+    document.getElementById('results').classList.add('show');
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (e) {
+    showErr('Ошибка: ' + e.message);
+  } finally {
+    document.getElementById('goBtn').disabled = false;
+    document.getElementById('loader').classList.remove('show');
+    setTimeout(() => { document.getElementById('prog').classList.remove('show'); setProgress(0); }, 700);
+  }
+}
+
+async function translateChunk(chunk, srcLang, tgtLang) {
+  const system = `You are a translation API. Output ONLY a raw JSON array. No markdown. No explanation. No backticks. Response must start with [ and end with ].`;
+
+  const user = `Translate this ${srcLang} text to ${tgtLang}.
+
+Split into individual sentences (1-2 sentences per unit).
+Return a JSON array. Each element:
+{"o":"original","t":"translation","v":[{"p":"phrase","e":"explanation in Russian"}]}
+
+"v" can be empty array if no notable phrases.
+
+Text:
+${chunk}`;
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 2000,
+      system,
+      messages: [
+        { role: 'user', content: user },
+        { role: 'assistant', content: '[' }
+      ]
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `HTTP ${response.status}`);
+  }
+
+  const data = await response.json();
+  let raw = '[' + (data.content || []).map(b => b.text || '').join('');
+  raw = raw.trim();
+
+  // Ensure valid closing
+  if (!raw.endsWith(']')) {
+    const last = raw.lastIndexOf('}');
+    raw = last !== -1 ? raw.slice(0, last + 1) + ']' : raw + ']';
+  }
+
+  try {
+    return JSON.parse(raw);
+  } catch (e) {
+    const m = raw.match(/\[[\s\S]*\]/);
+    if (m) { try { return JSON.parse(m[0]); } catch (e2) {} }
+    console.warn('Parse fail:', raw.slice(0, 300));
+    return null;
+  }
+}
+
+// RENDER
+function renderBlocks(blocks, isEn) {
+  const box = document.getElementById('resultsBox');
+  blocks.forEach((b, i) => {
+    if (!b || !b.o || !b.t) return;
+    const enText = isEn ? b.o : b.t;
+    const ruText = isEn ? b.t : b.o;
+
+    let vocabHTML = '';
+    if (b.v && b.v.length) {
+      vocabHTML = `<div class="vocab"><div class="tag">📖 Выражения</div>${
+        b.v.map(v => `<div class="v-item"><div class="v-phrase">${esc(v.p)}</div><div class="v-exp">${esc(v.e)}</div></div>`).join('')
+      }</div>`;
+    }
+
+    const div = document.createElement('div');
+    div.className = 'para';
+    div.style.animationDelay = `${(i * 0.05).toFixed(2)}s`;
+    div.innerHTML = `
+      <div class="p-en"><div class="tag">English</div>${esc(enText)}</div>
+      <div class="p-ru"><div class="tag">Перевод</div>${esc(ruText)}</div>
+      ${vocabHTML}`;
+    box.appendChild(div);
+  });
+}
+
+function setProgress(p) { document.getElementById('progFill').style.width = p + '%'; }
+function showErr(msg) { const b = document.getElementById('errBox'); b.textContent = msg; b.classList.toggle('show', !!msg); }
+function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+function resetAll() {
+  clearFile();
+  document.getElementById('textInput').value = '';
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('resultsBox').innerHTML = '';
+  showErr('');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
